@@ -889,6 +889,30 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 			QString sfStr = QString("%1 = %2").arg(info.sfName, sfVal);
 			body << sfStr;
 		}
+
+		// extra scalar fields
+		const ccGenericPointCloud* cloud = m_pickedPoints[0]._cloud;
+		unsigned ptIndex = m_pickedPoints[0].index;
+
+		const ccPointCloud* ccCloud = dynamic_cast<const ccPointCloud*>(cloud);
+		if (ccCloud)
+		{
+			int displayedSFIdx = ccCloud->getCurrentDisplayedScalarFieldIndex();
+			unsigned printed = 0;
+
+			for (unsigned i = 0; i < ccCloud->getNumberOfScalarFields(); ++i)
+			{
+				if ((int)i == displayedSFIdx)
+					continue;
+
+				CCCoreLib::ScalarField* sf = ccCloud->getScalarField(i);
+				ScalarType val = sf->getValue(ptIndex);
+				body << QString("%1 = %2")
+					.arg(QString::fromStdString(sf->getName()))
+					.arg(val, 0, 'f', precision);
+				++printed;
+			}
+		}
 	}
 	break;
 
